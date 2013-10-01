@@ -31,6 +31,7 @@ package net.onrc.openvirtex.elements.network;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,6 +47,7 @@ import net.onrc.openvirtex.elements.datapath.OVXSingleSwitch;
 import net.onrc.openvirtex.elements.datapath.OVXSwitch;
 import net.onrc.openvirtex.elements.datapath.PhysicalSwitch;
 import net.onrc.openvirtex.elements.datapath.Switch;
+import net.onrc.openvirtex.elements.host.Host;
 import net.onrc.openvirtex.elements.link.OVXLink;
 import net.onrc.openvirtex.elements.link.PhysicalLink;
 import net.onrc.openvirtex.elements.port.OVXPort;
@@ -74,30 +76,23 @@ import com.google.common.collect.Lists;
  * 
  */
 public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> {
-
-    private final Integer                        tenantId;
-    private final String                         protocol;
-    private final String                         controllerHost;
-    private final Integer                        controllerPort;
-    private final IPAddress                      network;
-    private final short                          mask;
-    private HashMap<IPAddress, MACAddress>       gwsMap;
-    private boolean                              bootState;
-    private static AtomicInteger                 tenantIdCounter = new AtomicInteger(
-	                                                                 1);
-    private final AtomicLong                     dpidCounter;
-    private final AtomicInteger                  linkCounter;
-    private final AtomicInteger                  ipCounter;
-    private final LinkedList<MACAddress>         macList;
+    static Logger log = LogManager.getLogger(OVXNetwork.class.getName());
+    
+    private final Integer tenantId;
+    private final String protocol;
+    private final String controllerHost;
+    private final Integer controllerPort;
+    private final IPAddress network;
+    private final short mask;
+    private HashMap<IPAddress, MACAddress> gwsMap;
+    private boolean bootState;
+    private static AtomicInteger tenantIdCounter = new AtomicInteger(1);
+    private final AtomicLong dpidCounter;
+    private final AtomicInteger linkCounter;
+    private final AtomicInteger ipCounter;
+    private final List<Host> hostList;
     private final HashBiMap<Integer, BigInteger> flowValues;
-    private final AtomicInteger                  flowCounter;
-
-    // TODO: implement vlink flow pusher
-    // public VLinkManager vLinkMgmt;
-
-    static Logger                                log             = LogManager
-	                                                                 .getLogger(OVXNetwork.class
-	                                                                         .getName());
+    private final AtomicInteger flowCounter;
 
     public OVXNetwork(final String protocol, final String controllerHost,
 	    final Integer controllerPort, final IPAddress network,
@@ -114,7 +109,7 @@ public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> {
 	// TODO: decide which value to start linkId's
 	this.linkCounter = new AtomicInteger(1);
 	this.ipCounter = new AtomicInteger(1);
-	this.macList = new LinkedList<MACAddress>();
+	this.hostList = new LinkedList<Host>();
 	this.flowValues = HashBiMap.create();
 	this.flowCounter = new AtomicInteger(1);
     }
@@ -153,6 +148,36 @@ public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> {
     
     public boolean isBooted() {
 	return this.bootState;
+    }
+
+    public List<Host> getHosts() {
+	return Collections.unmodifiableList(this.hostList);
+    }
+    
+    public Host getHost(MACAddress mac) {
+	for (Host host : this.hostList) {
+	    if (host.getMac().toLong() == mac.toLong())
+		return host;
+	}
+	return null;
+    }
+    
+    public Host getHost(OVXPort port) {
+	for (Host host : this.hostList) {
+	    if (host.getPort().equals(port))
+		return host;
+	}
+	return null;
+    }
+
+    /**
+     * Get list of all registered MAC addresses in this virtual network
+     */
+    private List<MACAddress> getMACList() {
+	List<MACAddress> result = new LinkedList<MACAddress>();
+	for (Host host : this.hostList)
+	    result.add(host.getMac());
+	return result;
     }
 
     public void unregister() {
@@ -207,7 +232,7 @@ public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> {
 	final PhysicalPort phySrcPort = physicalLinks.get(0).getSrcPort();
 	final OVXPort srcPort = new OVXPort(this.tenantId, phySrcPort, false);
 	final PhysicalPort phyDstPort = physicalLinks.get(
-	        physicalLinks.size() - 1).getDstPort();
+		physicalLinks.size() - 1).getDstPort();
 	final OVXPort dstPort = new OVXPort(this.tenantId, phyDstPort, false);
 
 	// Create link, add it to the topology, register it in the map
@@ -219,9 +244,9 @@ public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> {
 	dstPort.register();
 
 	final OVXLink link = new OVXLink(linkId, this.tenantId, srcPort,
-	        dstPort);
+		dstPort);
 	final OVXLink reverseLink = new OVXLink(linkId, this.tenantId, dstPort,
-	        srcPort);
+		srcPort);
 	super.addLink(link);
 	super.addLink(reverseLink);
 	link.register(physicalLinks);
@@ -239,21 +264,18 @@ public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> {
 	    final MACAddress mac) {
 	// TODO: check if dpid & port exist
 	final PhysicalSwitch physicalSwitch = PhysicalNetwork.getInstance()
-	        .getSwitch(physicalDpid);
+		.getSwitch(physicalDpid);
 	final PhysicalPort physicalPort = physicalSwitch.getPort(portNumber);
 
 	final OVXPort edgePort = new OVXPort(this.tenantId, physicalPort, true);
 	edgePort.register();
 	OVXMap.getInstance().addMAC(mac, this.tenantId);
-	this.macList.add(mac);
+	Host host = new Host(mac, edgePort);
+	this.hostList.add(host);
 	return edgePort;
-    }
-
-    // TODO
-    public void createGateway(final IPAddress ip) {
 
     }
-
+	
     /**
      * Boots the virtual network by booting each virtual switch. TODO: we should
      * roll-back if any switch fails to boot
@@ -274,15 +296,15 @@ public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> {
     public Integer storeFlowValues(final byte[] srcMac, final byte[] dstMac) {
 	// TODO: Optimize flow numbers
 	final BigInteger dualMac = new BigInteger(ArrayUtils.addAll(srcMac,
-	        dstMac));
+		dstMac));
 	Integer flowId = this.flowValues.inverse().get(dualMac);
 	if (flowId == null) {
 	    flowId = this.flowCounter.getAndIncrement();
 	    OVXNetwork.log
-		    .debug("virtual net = {]: save flowId = {} that is associated to {} {}",
-		            this.tenantId, flowId, MACAddress.valueOf(srcMac)
-		                    .toString(), MACAddress.valueOf(dstMac)
-		                    .toString());
+	    .debug("virtual net = {]: save flowId = {} that is associated to {} {}",
+		    this.tenantId, flowId, MACAddress.valueOf(srcMac)
+		    .toString(), MACAddress.valueOf(dstMac)
+		    .toString());
 	    this.flowValues.put(flowId, dualMac);
 	}
 	return flowId;
@@ -303,18 +325,19 @@ public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> {
 
     public Integer getFlowId(final byte[] srcMac, final byte[] dstMac) {
 	final BigInteger dualMac = new BigInteger(ArrayUtils.addAll(srcMac,
-	        dstMac));
+		dstMac));
 	OVXNetwork.log
-	        .debug("virtual net = {]: retrieving flowId that is associated to {} {}",
-	                this.tenantId, MACAddress.valueOf(srcMac).toString(),
-	                MACAddress.valueOf(dstMac).toString());
+	.debug("virtual net = {]: retrieving flowId that is associated to {} {}",
+		this.tenantId, MACAddress.valueOf(srcMac).toString(),
+		MACAddress.valueOf(dstMac).toString());
 	final Integer flowId = this.flowValues.inverse().get(dualMac);
 	return flowId;
     }
 
     private void generateFlowPairs() {
-	for (final MACAddress srcMac : this.macList) {
-	    for (final MACAddress dstMac : this.macList) {
+	List<MACAddress> macList = this.getMACList();
+	for (final MACAddress srcMac : macList) {
+	    for (final MACAddress dstMac : macList) {
 		if (srcMac.toLong() != dstMac.toLong()) {
 		    this.storeFlowValues(srcMac.toBytes(), dstMac.toBytes());
 		}
