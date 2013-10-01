@@ -464,4 +464,51 @@ public class OVXMap implements Mappable {
 	}
 
 	// Remove objects from dictionary
+
+	public void removeNetwork(OVXNetwork network) {
+	    int tenantId = network.getTenantId();
+	    if (this.networkMap.get(tenantId) != null) {
+		this.networkMap.remove(tenantId);
+	    }
+	}
+
+	public void removeVirtualLink(OVXLink virtualLink) {
+
+	    if (this.virtualLinkMap.get(virtualLink) != null) {
+		ArrayList<PhysicalLink> physicalLinks = this.virtualLinkMap.get(virtualLink);
+		for (PhysicalLink physicalLink : physicalLinks) {
+		    if (this.physicalLinkMap.get(physicalLink).containsKey(virtualLink.getTenantId())) {
+			this.physicalLinkMap.get(physicalLink).remove(virtualLink.getTenantId());
+		    }
+		}
+		this.virtualLinkMap.remove(virtualLink);
+	    }
+	}
+
+	public void removeVirtualSwitch(OVXSwitch virtualSwitch) {
+	    if (this.virtualSwitchMap.containsKey(virtualSwitch)) {
+		ArrayList<PhysicalSwitch> physicalSwitches = this.virtualSwitchMap.get(virtualSwitch);
+		for (PhysicalSwitch physicalSwitch : physicalSwitches) {
+		    if (this.physicalSwitchMap.get(physicalSwitch).containsKey(virtualSwitch.getTenantId())) {
+			this.physicalSwitchMap.get(physicalSwitch).remove(virtualSwitch.getTenantId());
+		    }
+		}
+		this.virtualSwitchMap.remove(virtualSwitch);
+	    }
+	}
+
+	public void removeVirtualIPs(int tenantId){
+	    ArrayList <String> physicalIPs = new ArrayList<String>();
+	    for (ConcurrentHashMap<Integer, PhysicalIPAddress> map : virtualIPMap.getValuesForKeysStartingWith("")) {
+		if (map.containsKey(tenantId)) {
+		    physicalIPs.add(map.get(tenantId).toString());
+		    map.remove(tenantId);
+		}
+	    }
+
+	    for (String physicalIP : physicalIPs) {
+		physicalIPMap.remove(physicalIP);
+	    }
+	}
+
 }

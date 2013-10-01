@@ -26,31 +26,32 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  */
+package net.onrc.openvirtex.api.service.handlers.tenant;
 
-package net.onrc.openvirtex.routing;
+import java.util.Map;
 
-import java.util.LinkedList;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import net.onrc.openvirtex.elements.datapath.OVXBigSwitch;
-import net.onrc.openvirtex.elements.link.PhysicalLink;
-import net.onrc.openvirtex.elements.port.OVXPort;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2ParamsType;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 
-public class ShortestPath implements Routable {
+import net.onrc.openvirtex.api.service.handlers.ApiHandler;
 
-	@Override
-	public LinkedList<PhysicalLink> computePath(final OVXPort srcPort,
-			final OVXPort dstPort) {
-		return null;
-	}
+public class RemoveOVXSwitchRoute extends ApiHandler<Map<String, Object>> {
 
-	@Override
-	public SwitchRoute getRoute(final OVXBigSwitch vSwitch,
-			final OVXPort srcPort, final OVXPort dstPort) {
-		return null;
-	}
+    Logger log = LogManager.getLogger(RemoveOVXSwitchRoute.class.getName());
 
-	@Override
-	public String getName() {
-		return "shortest path";
-	}
+    @Override
+    public JSONRPC2Response process(final Map<String, Object> params) {
+	// TODO Auto-generated method stub
+	return null;
+    }
+
+    @Override
+    public JSONRPC2ParamsType getType() {
+	return JSONRPC2ParamsType.OBJECT;
+    }
+
 }
+

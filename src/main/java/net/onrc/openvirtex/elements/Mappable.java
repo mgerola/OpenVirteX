@@ -188,4 +188,37 @@ public interface Mappable {
 	 */
 	public Map<Integer, OVXNetwork> listVirtualNetworks();
 	
+	/**
+	 * Delete the OVXNetwork object.
+	 * 
+	 * @param OVXNetwork network
+	 *            This is object representing the virtual network
+	 */
+	public void removeNetwork(OVXNetwork network);
+	
+	/**
+	 * Delete the OVXLink object.
+	 * 
+	 * @param OVXLink virtualLink
+	 *            This is object representing the virtual link
+	 */
+	public void removeVirtualLink(OVXLink virtualLink);
+	
+	/**
+	 * Delete the OVXSwitch object.
+	 * 
+	 * @param OVXSwitch virtualSwitch
+	 *            This is object representing the virtual switch
+	 */
+	public void removeVirtualSwitch(OVXSwitch virtualSwitch);
+	
+	/**
+	 * Delete all the IPs associated to a single virtual network.
+	 * 
+	 * @param tenantId
+	 *            This is an Integer that represents a unique number for each
+	 *            virtualNetwork
+	 */
+	public void removeVirtualIPs(int tenantId);
+	
 }

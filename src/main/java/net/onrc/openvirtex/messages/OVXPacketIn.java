@@ -37,7 +37,7 @@ import net.onrc.openvirtex.elements.address.OVXIPAddress;
 import net.onrc.openvirtex.elements.address.PhysicalIPAddress;
 import net.onrc.openvirtex.elements.datapath.OVXSwitch;
 import net.onrc.openvirtex.elements.datapath.PhysicalSwitch;
-import net.onrc.openvirtex.elements.link.LinkUtils;
+import net.onrc.openvirtex.elements.link.OVXLinkUtils;
 import net.onrc.openvirtex.elements.link.OVXLink;
 import net.onrc.openvirtex.elements.link.OVXLinkField;
 import net.onrc.openvirtex.elements.network.OVXNetwork;
@@ -119,7 +119,7 @@ public class OVXPacketIn extends OFPacketIn implements Virtualizable {
     		Ethernet eth = new Ethernet();
     		eth.deserialize(this.getPacketData(), 0, this.getPacketData().length);
 
-    		LinkUtils lUtils = new LinkUtils(eth.getSourceMAC(), eth.getDestinationMAC());
+    		OVXLinkUtils lUtils = new OVXLinkUtils(eth.getSourceMAC(), eth.getDestinationMAC());
     		//rewrite the OFMatch with the values of the link
     		if (lUtils.isValid()) {
     			OVXPort srcPort = port.getOVXPort(lUtils.getTenantId(), lUtils.getLinkId());

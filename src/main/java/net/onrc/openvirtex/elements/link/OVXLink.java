@@ -119,6 +119,13 @@ public class OVXLink extends Link<OVXPort, OVXSwitch> {
 		this.srcPort.getParentSwitch().getMap().addLinks(physicalLinks, this);
 	}
 
+	public void unregister() {
+	    Mappable map = this.srcPort.getParentSwitch().getMap();
+	    map.removeVirtualLink(this);
+	    map.getVirtualNetwork(tenantId).removeLink(this);
+	    this.srcPort.unregister();
+	}
+	
 	public void generateLinkFMs(OFFlowMod fm, Integer flowId, OVXSwitch sw) {
     	Short inPort = 0;
     	Short outPort = 0;
@@ -137,7 +144,7 @@ public class OVXLink extends Link<OVXPort, OVXSwitch> {
 		OFMatch match = linkFM.getMatch().clone();
 		
     	OVXLinkField linkField = OpenVirteXController.getInstance().getOvxLinkField();
-    	LinkUtils lUtils = new LinkUtils(this.tenantId, this.linkId, flowId);
+    	OVXLinkUtils lUtils = new OVXLinkUtils(this.tenantId, this.linkId, flowId);
 		//TODO: Need to check that the values in linkId and flowId don't exceed their space
 		if (linkField == OVXLinkField.MAC_ADDRESS) {
 			match.setDataLayerSource(lUtils.getSrcMac().toBytes());
@@ -222,7 +229,7 @@ public class OVXLink extends Link<OVXPort, OVXSwitch> {
 		
 		List<OFAction> actions = new LinkedList<OFAction>();
 		OVXLinkField linkField = OpenVirteXController.getInstance().getOvxLinkField();
-		LinkUtils lUtils = new LinkUtils(tenantId, linkId, flowId);
+		OVXLinkUtils lUtils = new OVXLinkUtils(tenantId, linkId, flowId);
 		//TODO: Need to check that the values in linkId and flowId don't exceed their space
 		if (linkField == OVXLinkField.MAC_ADDRESS) {
 			actions.add(new OFActionDataLayerSource(lUtils.getSrcMac().toBytes()));
@@ -243,7 +250,7 @@ public class OVXLink extends Link<OVXPort, OVXSwitch> {
 			flowId = sw.getMap().getVirtualNetwork(this.tenantId).
 					getFlowId(match.getDataLayerSource(), match.getDataLayerDestination());
 			if (flowId != null) {
-    			LinkUtils lUtils = new LinkUtils(this.getTenantId(), linkId, flowId);
+    			OVXLinkUtils lUtils = new OVXLinkUtils(this.getTenantId(), linkId, flowId);
     			LinkedList<MACAddress> macList = sw.getMap().getVirtualNetwork(this.tenantId).getFlowValues(lUtils.getFlowId());
     			if (macList.size() == 0)
     				throw new DroppedMessageException();
@@ -270,7 +277,7 @@ public class OVXLink extends Link<OVXPort, OVXSwitch> {
 			Integer flowId = sw.getMap().getVirtualNetwork(this.tenantId).
 					getFlowId(match.getDataLayerSource(), match.getDataLayerDestination());
 			if (flowId != null) {
-    			LinkUtils lUtils = new LinkUtils(sw.getTenantId(), linkId, flowId);
+    			OVXLinkUtils lUtils = new OVXLinkUtils(sw.getTenantId(), linkId, flowId);
     			match.setDataLayerSource(lUtils.getSrcMac().toBytes());
     			match.setDataLayerDestination(lUtils.getDstMac().toBytes());
 			}

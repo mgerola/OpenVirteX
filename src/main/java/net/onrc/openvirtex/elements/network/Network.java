@@ -64,13 +64,13 @@ public abstract class Network<T1, T2, T3> implements LLDPEventHandler,
 
     @SerializedName("switches")
     @Expose
-	private final HashSet<T1>              switchSet;
+	protected final HashSet<T1>              switchSet;
     @SerializedName("links")
     @Expose
-	private final HashSet<T3>              linkSet;
-	private final HashMap<Long, T1>        dpidMap;
-	private final HashMap<T2, T2>          neighborPortMap;
-	private final HashMap<T1, HashSet<T1>> neighborMap;
+	protected final HashSet<T3>              linkSet;
+	protected final HashMap<Long, T1>        dpidMap;
+	protected final HashMap<T2, T2>          neighborPortMap;
+	protected final HashMap<T1, HashSet<T1>> neighborMap;
 
 	Logger log = LogManager.getLogger(Network.class.getName());
 
@@ -110,8 +110,9 @@ public abstract class Network<T1, T2, T3> implements LLDPEventHandler,
 	 * Remove link to topology
 	 * 
 	 * @param link
+	 * @return 
 	 */
-	protected void removeLink(final T3 link) {
+	protected boolean removeLink(final T3 link) {
 		this.linkSet.remove(link);
 		final T1 srcSwitch = (T1) ((Link) link).getSrcSwitch();
 		final T1 dstSwitch = (T1) ((Link) link).getDstSwitch();
@@ -123,6 +124,7 @@ public abstract class Network<T1, T2, T3> implements LLDPEventHandler,
 		neighbours.remove(dstSwitch);
 		this.neighborPortMap.remove(((Link) link).getSrcPort());
 		this.log.info("Removing link " + link.toString());
+		return true;
 	}
 
 	/**

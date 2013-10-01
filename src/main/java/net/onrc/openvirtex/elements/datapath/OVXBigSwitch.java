@@ -138,7 +138,7 @@ public class OVXBigSwitch extends OVXSwitch {
 	@Override
 	public void sendMsg(final OFMessage msg, final OVXSendMsg from) {
 		// TODO Truncate the message for the ctrl to the missSetLenght value
-		if (this.isConnected) {
+		if (this.isConnected  && this.isActive) {
 			this.channel.write(Collections.singletonList(msg));
 		}
 	}

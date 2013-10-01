@@ -196,12 +196,12 @@ public abstract class Switch<T extends Port> implements OVXEventHandler,
 	 *            the port number
 	 * @return true, if successful
 	 */
-	protected boolean removePort(final Short portNumber) {
-		if (this.portMap.containsKey(portNumber)) {
-			this.portMap.remove(portNumber);
-			return true;
-		}
-		return false;
+	public boolean removePort(Short portNumber) {
+	    if (this.portMap.containsKey(portNumber)) {
+		this.portMap.remove(portNumber);
+		return true;
+	    }
+	    return false;
 	};
 
 	/*

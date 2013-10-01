@@ -29,11 +29,16 @@
 
 package net.onrc.openvirtex.elements.datapath;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.onrc.openvirtex.core.OpenVirteXController;
+import net.onrc.openvirtex.elements.network.OVXNetwork;
 import net.onrc.openvirtex.elements.port.OVXPort;
 import net.onrc.openvirtex.messages.OVXFlowMod;
 import net.onrc.openvirtex.messages.OVXPacketIn;
@@ -242,11 +247,39 @@ public abstract class OVXSwitch extends Switch<OVXPort> {
 	public void register(final List<PhysicalSwitch> physicalSwitches) {
 		this.map.addSwitches(physicalSwitches, this);
 	}
+	
+	public void unregister() {
+	    this.isActive = false;
+	    if (this.getPorts() != null) {
+		Set<Short> portSet = new TreeSet<Short>(this.getPorts().keySet());
+		for (Short portNumber : portSet) {
+		    //TODO: after merging with Ayaka, retrieve link from port and not from linkId
+		    OVXPort port = this.getPort(portNumber);
+		    if (port.isEdge()) 
+			port.unregister();
+		    else {
+			OVXNetwork virtualNetwork = map.getVirtualNetwork(this.tenantId);
+		        OVXPort neighPort = virtualNetwork.getNeighborPort(port);
+			virtualNetwork.getLink(port, neighPort).unregister();
+			virtualNetwork.getLink(neighPort, port).unregister();
+		    }
+		}
+	    }
+
+	    // remove the switch from the map
+	    this.map.getVirtualNetwork(this.tenantId).removeSwitch(this);
+	    this.map.removeVirtualSwitch(this);
+	    tearDown();
+	}
+
+	public void tearDown() {
+	    this.channel.close();
+	}
 
 	/**
 	 * Generate features reply.
 	 */
-	protected void generateFeaturesReply() {
+	public void generateFeaturesReply() {
 		final OFFeaturesReply ofReply = new OFFeaturesReply();
 		ofReply.setDatapathId(this.switchId);
 		final LinkedList<OFPhysicalPort> portList = new LinkedList<OFPhysicalPort>();

@@ -75,4 +75,14 @@ public class PhysicalPort extends Port<PhysicalSwitch> {
 			this.ovxPortMap.put(ovxPort.getTenantId(), portMap);
 		}
 	}
+	
+	public void removeOVXPort(OVXPort ovxPort) {
+	    if (this.ovxPortMap.containsKey(ovxPort.getTenantId())) {
+		this.ovxPortMap.remove(ovxPort.getTenantId());
+	    }
+	}
+
+	public boolean equals(PhysicalPort port) {
+	    return this.portNumber==port.portNumber && this.parentSwitch.getSwitchId() == port.getParentSwitch().getSwitchId();
+	}
 }

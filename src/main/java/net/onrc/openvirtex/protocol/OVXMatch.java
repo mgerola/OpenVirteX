@@ -29,80 +29,110 @@
 
 package net.onrc.openvirtex.protocol;
 
-import net.onrc.openvirtex.messages.OVXPacketIn;
-
 import org.openflow.protocol.OFMatch;
 
+/**
+ * The Class OVXMatch. This class extends the OFMatch class, in order to carry some useful informations for OpenVirteX, 
+ * as the cookie (used by flowMods messages) and the packet data (used by packetOut messages)
+ */
 public class OVXMatch extends OFMatch {
 
-	private static final long serialVersionUID = 1L;
-	protected long cookie;
-	protected byte[] pktData;
-	
-	public OVXMatch() {
-		super();
-		this.cookie = 0;
-		this.pktData = null;
-	}
-	
+    /** The Constant serialVersionUID. */
+    private static final long serialVersionUID = 1L;
+    
+    /** The cookie. */
+    protected long            cookie;
+    
+    /** The pkt data. */
+    protected byte[]          pktData;
 
-	/**
-	 * @param match
-	 */
-	public OVXMatch(OFMatch match) {
-		this.wildcards = match.getWildcards();
-		this.inputPort = match.getInputPort();
-		this.dataLayerSource = match.getDataLayerSource();
-		this.dataLayerDestination = match.getDataLayerDestination();
-		this.dataLayerVirtualLan = match.getDataLayerVirtualLan();
-		this.dataLayerVirtualLanPriorityCodePoint = match.getDataLayerVirtualLanPriorityCodePoint();
-		this.dataLayerType = match.getDataLayerType();
-		this.networkTypeOfService = match.getNetworkTypeOfService();
-		this.networkProtocol = match.getNetworkProtocol();
-		this.networkSource = match.getNetworkSource();
-		this.networkDestination = match.getNetworkDestination();
-		this.transportSource = match.getTransportSource();
-		this.transportDestination = match.getTransportDestination();
-		this.cookie = 0;
-		this.pktData = null;
-	}
+    /**
+     * Instantiates a new void OVXatch.
+     */
+    public OVXMatch() {
+	super();
+	this.cookie = 0;
+	this.pktData = null;
+    }
 
+    /**
+     * Instantiates a new OVXmatch from an OFMatch instance.
+     *
+     * @param match the match
+     */
+    public OVXMatch(final OFMatch match) {
+	this.wildcards = match.getWildcards();
+	this.inputPort = match.getInputPort();
+	this.dataLayerSource = match.getDataLayerSource();
+	this.dataLayerDestination = match.getDataLayerDestination();
+	this.dataLayerVirtualLan = match.getDataLayerVirtualLan();
+	this.dataLayerVirtualLanPriorityCodePoint = match
+	        .getDataLayerVirtualLanPriorityCodePoint();
+	this.dataLayerType = match.getDataLayerType();
+	this.networkTypeOfService = match.getNetworkTypeOfService();
+	this.networkProtocol = match.getNetworkProtocol();
+	this.networkSource = match.getNetworkSource();
+	this.networkDestination = match.getNetworkDestination();
+	this.transportSource = match.getTransportSource();
+	this.transportDestination = match.getTransportDestination();
+	this.cookie = 0;
+	this.pktData = null;
+    }
 
-	/**
-	 * Get cookie
-	 * 
-	 * @return
-	 */
-	public long getCookie() {
-		return this.cookie;
-	}
+    /**
+     * Get cookie.
+     *
+     * @return the cookie
+     */
+    public long getCookie() {
+	return this.cookie;
+    }
 
-	/**
-	 * Set cookie
-	 * 
-	 * @param cookie
-	 */
-	public OVXMatch setCookie(long cookie) {
-		this.cookie = cookie;
-		return this;
-	}
-	
-	public byte[] getPktData() {
-		return this.pktData;
-	}
+    /**
+     * Set cookie.
+     *
+     * @param cookie the cookie
+     * @return the oVX match
+     */
+    public OVXMatch setCookie(final long cookie) {
+	this.cookie = cookie;
+	return this;
+    }
 
+    /**
+     * Gets the pkt data.
+     *
+     * @return the pkt data
+     */
+    public byte[] getPktData() {
+	return this.pktData;
+    }
 
-	public void setPktData(byte[] pktData) {
-		this.pktData = pktData;
-	}
+    /**
+     * Sets the pkt data.
+     *
+     * @param pktData the new pkt data
+     */
+    public void setPktData(final byte[] pktData) {
+	this.pktData = pktData;
+    }
 
+    /**
+     * Checks if this match belongs to a flow mod (e.g. the cookie is not zero).
+     *
+     * @return true, if is flow mod
+     */
+    public boolean isFlowMod() {
+	return this.cookie != 0;
+    }
 
-	public boolean isFlowMod() {
-		return this.cookie != 0;
-	}
-	
-	public boolean isPacketOut() {
-		return this.pktData != null;
-	}
-	
+    /**
+     * Checks if this match belongs to a packet out (e.g. the packet data is not null).
+     *
+     * @return true, if is packet out
+     */
+    public boolean isPacketOut() {
+	return this.pktData != null;
+    }
+
 }
