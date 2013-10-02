@@ -510,5 +510,9 @@ public class OVXMap implements Mappable {
 		physicalIPMap.remove(physicalIP);
 	    }
 	}
+	
+	public void removeMAC(final MACAddress mac) {
+	    this.macMap.remove(mac.toStringNoColon());
+	}
 
 }

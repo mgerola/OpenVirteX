@@ -220,5 +220,12 @@ public interface Mappable {
 	 *            virtualNetwork
 	 */
 	public void removeVirtualIPs(int tenantId);
-	
+
+	/**
+	 * This function remove the map between the MAC and tenantId
+	 * 
+	 * @param mac
+	 * @param tenantId
+	 */
+	public void removeMAC(MACAddress mac);
 }

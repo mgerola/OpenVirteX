@@ -160,18 +160,6 @@ public class OVXBigSwitch extends OVXSwitch {
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.onrc.openvirtex.elements.datapath.Switch#tearDown()
-	 */
-	@Override
-	public void tearDown() {
-		// TODO: Release any acquired resources.
-		this.channel.disconnect();
-
-	}
-
 	@Override
 	public boolean boot() {
 		return super.boot();

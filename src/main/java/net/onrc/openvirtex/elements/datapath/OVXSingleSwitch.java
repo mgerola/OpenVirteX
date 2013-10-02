@@ -88,18 +88,6 @@ public class OVXSingleSwitch extends OVXSwitch {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.onrc.openvirtex.elements.datapath.Switch#tearDown()
-	 */
-	@Override
-	public void tearDown() {
-		// TODO: Release any acquired resources
-		this.channel.disconnect();
-
-	}
-
 	@Override
 	// TODO: this is probably not optimal
 	public void sendSouth(final OFMessage msg) {

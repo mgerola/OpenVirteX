@@ -34,7 +34,7 @@ import org.openflow.protocol.OFPortStatus.OFPortReason;
 
 import net.onrc.openvirtex.elements.OVXMap;
 import net.onrc.openvirtex.elements.datapath.OVXSwitch;
-import net.onrc.openvirtex.elements.link.OVXLink;
+import net.onrc.openvirtex.elements.host.Host;
 import net.onrc.openvirtex.elements.network.OVXNetwork;
 
 public class OVXPort extends Port<OVXSwitch> {
@@ -116,6 +116,12 @@ public class OVXPort extends Port<OVXSwitch> {
 	if (this.parentSwitch.isActive()) {
 	    sendStatusMsg(OFPortReason.OFPPR_DELETE);
 	    this.parentSwitch.generateFeaturesReply();
+	}
+	if (this.isEdge) {
+	    OVXNetwork virtualNetwork = this.parentSwitch.getMap().getVirtualNetwork(this.tenantId);
+	    Host host = virtualNetwork.getHost(this);
+	    this.parentSwitch.getMap().removeMAC(host.getMac());
+	    virtualNetwork.removeHost(host.getMac());
 	}
     }
 

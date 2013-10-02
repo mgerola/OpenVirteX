@@ -28,7 +28,6 @@
  */
 package net.onrc.openvirtex.api.service.handlers.tenant;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -69,7 +68,6 @@ public class RemoveOVXSwitch extends ApiHandler<Map<String, Object>> {
 		HandlerUtils.isValidOVXSwitch(tenantId.intValue(), dpid.longValue());
 		final OVXSwitch ovxSwitch = virtualNetwork.getSwitch(dpid.longValue());
 		ovxSwitch.unregister();
-		virtualNetwork.removeSwitch(ovxSwitch);
 		if (ovxSwitch == null) {
 			resp = new JSONRPC2Response(-1, 0);
 		} else {

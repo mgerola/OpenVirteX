@@ -106,7 +106,6 @@ public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> {
 	this.mask = mask;
 	this.bootState = false;
 	this.dpidCounter = new AtomicLong(1);
-	// TODO: decide which value to start linkId's
 	this.linkCounter = new AtomicInteger(1);
 	this.ipCounter = new AtomicInteger(1);
 	this.hostList = new LinkedList<Host>();
@@ -181,12 +180,22 @@ public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> {
     }
 
     public void unregister() {
-	for (OVXSwitch virtualSwitch : this.getSwitches()) {
-	    virtualSwitch.unregister();
-	}
+	LinkedList<Long> dpids = new LinkedList<>();
+	for (OVXSwitch virtualSwitch : this.getSwitches())
+	    dpids.add(virtualSwitch.getSwitchId());
+	for (Long dpid : dpids)
+	    this.getSwitch(dpid).unregister();
 	// remove the network from the Map
+	OVXMap.getInstance().removeVirtualIPs(this.tenantId);
 	OVXMap.getInstance().removeNetwork(this);
     }
+    
+    public void stop() {
+	for (OVXSwitch sw : this.getSwitches())
+	    sw.tearDown();
+	this.bootState = false;
+    }
+    
     
     public AtomicInteger getLinkCounter() {
 	return this.linkCounter;
@@ -427,6 +436,7 @@ public class OVXNetwork extends Network<OVXSwitch, OVXPort, OVXLink> {
     }
     
     public boolean removeHost(final MACAddress hostAddress) {
-	return this.macList.remove(hostAddress);
+	Host host = this.getHost(hostAddress);
+	return this.hostList.remove(host);
     }
 }

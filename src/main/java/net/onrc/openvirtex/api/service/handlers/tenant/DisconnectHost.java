@@ -72,7 +72,6 @@ public class DisconnectHost extends ApiHandler<Map<String, Object>> {
 	    final OVXNetwork virtualNetwork = map.getVirtualNetwork(tenantId
 		    .intValue());
 	    final MACAddress macAddr = MACAddress.valueOf(mac);
-	    final boolean result = virtualNetwork.removeHost(macAddr);
 	    OVXPort virtualPort = virtualNetwork.getSwitch(dpid.longValue()).getPort(port.shortValue());
 	    if (virtualPort == null) {
 		resp = new JSONRPC2Response(-1, 0);

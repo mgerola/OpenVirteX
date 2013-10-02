@@ -22,6 +22,8 @@
 
 package net.onrc.openvirtex.messages;
 
+import java.util.List;
+
 import net.onrc.openvirtex.elements.datapath.PhysicalSwitch;
 import net.onrc.openvirtex.messages.statistics.VirtualizableStatistic;
 
@@ -39,8 +41,11 @@ public class OVXStatisticsReply extends OFStatisticsReply implements
 	@Override
 	public void virtualize(final PhysicalSwitch sw) {
 		try {
-			final OFStatistics stat = this.getFirstStatistics();
+		    List<? extends OFStatistics> stats = this.getStatistics();
+		    for (OFStatistics stat : stats) {
 			((VirtualizableStatistic) stat).virtualizeStatistic(sw, this);
+		    }
+			
 		} catch (final ClassCastException e) {
 			this.log.error("Statistic received is not virtualizable {}", this);
 		}
